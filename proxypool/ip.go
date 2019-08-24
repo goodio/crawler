@@ -6,7 +6,6 @@ import (
 	"time"
 	"encoding/json"
 	"sync"
-	"github.com/ghaoo/crawler/proxypool/getter"
 	"fmt"
 )
 
@@ -29,59 +28,6 @@ func RondomIP() {
 	for k, v := range ips {
 		fmt.Println("Key:", k, "Value:", v)
 	}
-}
-
-func Go() {
-	ipChan := make(chan *IP, 2000)
-
-	go func() {
-		CheckProxyDB()
-	}()
-
-	for i := 0; i < 50; i++ {
-		go func() {
-			for {
-				CheckAndSave(<-ipChan)
-			}
-		}()
-	}
-
-	for {
-		if len(ipChan) < 100 {
-			go run(ipChan)
-		}
-		time.Sleep(10 * time.Minute)
-	}
-}
-
-func run(ipChan chan<- *IP) {
-	var wg sync.WaitGroup
-	funs := []func() []*IP{
-		getter.Feiyi,
-		getter.IP66, //need to remove it
-		getter.KDL,
-		//getter.GBJ,	//因为网站限制，无法正常下载数据
-		//getter.Xici,
-		//getter.XDL,
-		//getter.IP181,  // 已经无法使用
-		//getter.YDL,	//失效的采集脚本，用作系统容错实验
-		getter.PLP,   //need to remove it
-		getter.IP89,
-	}
-	for _, f := range funs {
-		wg.Add(1)
-		go func(f func() []*IP) {
-			temp := f()
-
-			for _, v := range temp {
-
-				ipChan <- v
-			}
-			wg.Done()
-		}(f)
-	}
-	wg.Wait()
-	logrus.Println("All getters finished.")
 }
 
 func CheckAndSave(ip *IP) {
