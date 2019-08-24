@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/nladuo/go-phantomjs-fetcher"
 	"github.com/ghaoo/crawler/proxypool"
+	"github.com/nladuo/go-phantomjs-fetcher"
 	"github.com/sirupsen/logrus"
 )
 

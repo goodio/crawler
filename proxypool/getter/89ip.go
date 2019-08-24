@@ -4,10 +4,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"regexp"
-	"strings"
 	"github.com/ghaoo/crawler/proxypool"
 	"github.com/sirupsen/logrus"
+	"regexp"
+	"strings"
 )
 
 //IP89 get ip from www.89ip.cn

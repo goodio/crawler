@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"sync"
 	"github.com/ghaoo/crawler/proxypool/getter"
+	"fmt"
 )
 
 const BUCKET_NAME = `proxypool`
@@ -21,7 +22,16 @@ type IP struct {
 	Speed int64
 }
 
-func Getter() {
+func RondomIP() {
+
+	ips := db.FindAll(BUCKET_NAME)
+
+	for k, v := range ips {
+		fmt.Println("Key:", k, "Value:", v)
+	}
+}
+
+func Go() {
 	ipChan := make(chan *IP, 2000)
 
 	go func() {

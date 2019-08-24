@@ -1,11 +1,11 @@
 package getter
 
 import (
+	"github.com/ghaoo/crawler/proxypool"
+	"github.com/nladuo/go-phantomjs-fetcher"
+	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
-	"github.com/nladuo/go-phantomjs-fetcher"
-	"github.com/ghaoo/crawler/proxypool"
-	"github.com/sirupsen/logrus"
 )
 
 // Xici get ip from xicidaili.com

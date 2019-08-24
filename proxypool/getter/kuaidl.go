@@ -2,8 +2,8 @@ package getter
 
 import (
 	"github.com/Aiicy/htmlquery"
-	"github.com/sirupsen/logrus"
 	"github.com/ghaoo/crawler/proxypool"
+	"github.com/sirupsen/logrus"
 )
 
 // KDL get ip from kuaidaili.com

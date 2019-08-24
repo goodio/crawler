@@ -1,11 +1,11 @@
 package getter
 
 import (
-	"strings"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/ghaoo/crawler/proxypool"
 	"github.com/parnurzeal/gorequest"
 	"github.com/sirupsen/logrus"
-	"github.com/ghaoo/crawler/proxypool"
+	"strings"
 )
 
 // YDL get ip from youdaili.net

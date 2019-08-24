@@ -1,12 +1,11 @@
 package getter
 
 import (
-
 	"github.com/Aiicy/htmlquery"
-	"regexp"
-	"strconv"
 	"github.com/ghaoo/crawler/proxypool"
 	"github.com/sirupsen/logrus"
+	"regexp"
+	"strconv"
 )
 
 //feiyi get ip from feiyiproxy.com

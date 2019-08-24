@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/parnurzeal/gorequest"
 	"github.com/ghaoo/crawler/proxypool"
+	"github.com/parnurzeal/gorequest"
 	"github.com/sirupsen/logrus"
 )
 

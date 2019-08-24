@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/parnurzeal/gorequest"
 	"github.com/ghaoo/crawler/proxypool"
+	"github.com/parnurzeal/gorequest"
 	"github.com/sirupsen/logrus"
 )
 
