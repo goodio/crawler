@@ -5,9 +5,34 @@ import (
 	"github.com/ghaoo/crawler/proxypool/getter"
 	"github.com/sirupsen/logrus"
 	"sync"
+	"time"
 )
 
-func Run(ipChan chan<- *proxypool.IP) {
+func Go() {
+	ipChan := make(chan *proxypool.IP, 2000)
+
+	go func() {
+		proxypool.CheckProxyDB()
+	}()
+
+	for i := 0; i < 50; i++ {
+		go func() {
+			for {
+				proxypool.CheckAndSave(<-ipChan)
+			}
+		}()
+	}
+
+	for {
+		if len(ipChan) < 100 {
+			go run(ipChan)
+		}
+
+		time.Sleep(10 * time.Minute)
+	}
+}
+
+func run(ipChan chan<- *proxypool.IP) {
 	logrus.Info("初始化IP代理池...")
 	var wg sync.WaitGroup
 	funs := []func() []*proxypool.IP{

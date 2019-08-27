@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
-	"github.com/ghaoo/crawler/proxypool/initial"
 )
 
 const BUCKET_NAME = `proxypool`
@@ -19,30 +18,6 @@ type IP struct {
 	Type1 string
 	Type2 string
 	Speed int64
-}
-
-func Go() {
-	ipChan := make(chan *IP, 2000)
-
-	go func() {
-		CheckProxyDB()
-	}()
-
-	for i := 0; i < 50; i++ {
-		go func() {
-			for {
-				CheckAndSave(<-ipChan)
-			}
-		}()
-	}
-
-	for {
-		if len(ipChan) < 100 {
-			go initial.Run(ipChan)
-		}
-
-		time.Sleep(10 * time.Minute)
-	}
 }
 
 func RondomIP() IP {
