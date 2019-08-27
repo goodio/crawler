@@ -34,10 +34,10 @@ func IP66() (result []*proxypool.IP) {
 		ip := &proxypool.IP{}
 		ip.Data = strings.TrimSpace(ips[index])
 		ip.Type1 = "http"
-		logrus.Infof("[IP66] ip = %s, type = %s", ip.Data, ip.Type1)
+		//logrus.Infof("[IP66] ip = %s, type = %s", ip.Data, ip.Type1)
 		result = append(result, ip)
 	}
 
-	logrus.Info("IP66 done.")
+	//logrus.Info("IP66 done.")
 	return
 }

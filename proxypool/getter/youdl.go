@@ -40,6 +40,6 @@ func YDL() (result []*proxypool.IP) {
 		ip.Type1 = strings.ToLower(strings.Split(c[1], "#")[0])
 		result = append(result, ip)
 	})
-	logrus.Println("YDL done.")
+	//logrus.Println("YDL done.")
 	return
 }

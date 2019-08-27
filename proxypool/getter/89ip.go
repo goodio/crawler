@@ -35,10 +35,10 @@ func IP89() (result []*proxypool.IP) {
 		ip := &proxypool.IP{}
 		ip.Data = strings.TrimSpace(ips[index])
 		ip.Type1 = "http"
-		logrus.Info("[89IP] ip = %s, type = %s", ip.Data, ip.Type1)
+		//logrus.Infof("[89IP] ip = %s, type = %s", ip.Data, ip.Type1)
 		result = append(result, ip)
 	}
 
-	logrus.Info("89IP done.")
+	//logrus.Info("89IP done.")
 	return
 }

@@ -39,9 +39,9 @@ func Data5u() (result []*proxypool.IP) {
 		ip := &proxypool.IP{}
 		ip.Data = ss + ":" + sss
 		ip.Type1 = ssss
-		logrus.Printf("ip.Data = %s, ip.Type = %s", ip.Data, ip.Type1)
+		//logrus.Infof("ip.Data = %s, ip.Type = %s", ip.Data, ip.Type1)
 		result = append(result, ip)
 	})
-	logrus.Info("Data5u done.")
+	//logrus.Info("Data5u done.")
 	return
 }

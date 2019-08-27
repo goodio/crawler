@@ -31,11 +31,11 @@ func PLP() (result []*proxypool.IP) {
 			IP.Type1 = "http"
 		}
 
-		logrus.Info("[PLP] ip.Data = %s,ip.Type = %s,%s", IP.Data, IP.Type1, IP.Type2)
+		//logrus.Infof("[PLP] ip.Data = %s,ip.Type = %s,%s", IP.Data, IP.Type1, IP.Type2)
 
 		result = append(result, IP)
 	}
 
-	logrus.Info("PLP done.")
+	//logrus.Info("PLP done.")
 	return
 }

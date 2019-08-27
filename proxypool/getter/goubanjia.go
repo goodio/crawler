@@ -40,10 +40,10 @@ func GBJ() (result []*proxypool.IP) {
 		ip := &proxypool.IP{}
 		ip.Data = re.ReplaceAllString(tee, "")
 		ip.Type1 = s.Find("td:nth-child(3) > a").Text()
-		logrus.Printf("ip.Data = %s , ip.Type = %s\n", ip.Data, ip.Type1)
+		//logrus.Printf("ip.Data = %s , ip.Type = %s\n", ip.Data, ip.Type1)
 		result = append(result, ip)
 	})
 
-	logrus.Info("GBJ done.")
+	//logrus.Info("GBJ done.")
 	return
 }

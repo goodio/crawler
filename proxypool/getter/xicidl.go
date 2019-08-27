@@ -38,6 +38,6 @@ func Xici() (result []*proxypool.IP) {
 		ip.Type1 = "http"
 		result = append(result, ip)
 	}
-	logrus.Println("Xici done.")
+	//logrus.Println("Xici done.")
 	return
 }

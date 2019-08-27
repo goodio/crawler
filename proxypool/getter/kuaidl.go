@@ -33,6 +33,6 @@ func KDL() (result []*proxypool.IP) {
 		result = append(result, IP)
 	}
 
-	logrus.Info("[kuaidaili] done")
+	//logrus.Info("[kuaidaili] done")
 	return
 }

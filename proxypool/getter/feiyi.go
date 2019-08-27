@@ -20,7 +20,7 @@ func Feiyi() (result []*proxypool.IP) {
 		logrus.Warn(err.Error())
 	}
 	//debug begin
-	logrus.Info("[FEIYI] len(trNode) = %d ", len(trNode))
+	logrus.Infof("[FEIYI] len(trNode) = %d ", len(trNode))
 	for i := 1; i < len(trNode); i++ {
 		tdNode, _ := htmlquery.Find(trNode[i], "//td")
 		ip := htmlquery.InnerText(tdNode[0])
@@ -40,12 +40,12 @@ func Feiyi() (result []*proxypool.IP) {
 		}
 		IP.Speed = extractSpeed(speed)
 
-		logrus.Info("[FEIYI] ip.Data = %s,ip.Type = %s,%s ip.Speed = %d", IP.Data, IP.Type1, IP.Type2, IP.Speed)
+		//logrus.Infof("[FEIYI] ip.Data = %s,ip.Type = %s,%s ip.Speed = %d", IP.Data, IP.Type1, IP.Type2, IP.Speed)
 
 		result = append(result, IP)
 	}
 
-	logrus.Info("FEIYI done.")
+	//logrus.Info("FEIYI done.")
 	return
 }
 

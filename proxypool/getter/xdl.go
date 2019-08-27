@@ -43,6 +43,6 @@ func XDL() (result []*proxypool.IP) {
 		ip.Type1 = ssss
 		result = append(result, ip)
 	})
-	logrus.Info("XDL done.")
+	//logrus.Info("XDL done.")
 	return
 }

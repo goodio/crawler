@@ -1,12 +1,12 @@
 package proxypool
 
 import (
+	"encoding/json"
 	"github.com/parnurzeal/gorequest"
 	"github.com/sirupsen/logrus"
-	"time"
-	"encoding/json"
 	"sync"
-	"fmt"
+	"time"
+	"github.com/ghaoo/crawler/proxypool/initial"
 )
 
 const BUCKET_NAME = `proxypool`
@@ -21,27 +21,60 @@ type IP struct {
 	Speed int64
 }
 
-func RondomIP() {
+func Go() {
+	ipChan := make(chan *IP, 2000)
+
+	go func() {
+		CheckProxyDB()
+	}()
+
+	for i := 0; i < 50; i++ {
+		go func() {
+			for {
+				CheckAndSave(<-ipChan)
+			}
+		}()
+	}
+
+	for {
+		if len(ipChan) < 100 {
+			go initial.Run(ipChan)
+		}
+
+		time.Sleep(10 * time.Minute)
+	}
+}
+
+func RondomIP() IP {
 
 	ips := db.FindAll(BUCKET_NAME)
 
-	for k, v := range ips {
-		fmt.Println("Key:", k, "Value:", v)
+	ip := IP{}
+	for _, v := range ips {
+		json.Unmarshal(v, &ip)
+		logrus.Infof("IP: %s, type1: %s, type2: %s, speed: %d", ip.Data, ip.Type1, ip.Type2, ip.Speed)
+		break
 	}
+
+	return ip
 }
 
 func CheckAndSave(ip *IP) {
 	if CheckIP(ip) {
 		ipjs, _ := json.Marshal(ip)
+
 		err := db.Save(BUCKET_NAME, ip.Data, ipjs)
 
 		if err != nil {
 			logrus.Error("[CheckAndSave] Error = %v", err)
 		}
+
 	}
 }
 
 func CheckProxyDB() {
+
+	logrus.Info("检查数据库IP有效性...")
 
 	ips := db.FindAll(BUCKET_NAME)
 	if len(ips) <= 0 {
@@ -65,7 +98,9 @@ func CheckProxyDB() {
 			wg.Done()
 		}(i)
 	}
+
 	wg.Wait()
+	logrus.Info("数据库IP有效性检查完毕...")
 }
 
 func Delete(ip *IP) {
@@ -86,11 +121,11 @@ func CheckIP(ip *IP) bool {
 		testIP = "http://" + ip.Data
 		pollURL = "http://httpbin.org/get"
 	}
-	logrus.Warningf(testIP)
+	//logrus.Warningf(testIP)
 	begin := time.Now()
 	resp, _, errs := gorequest.New().Proxy(testIP).Get(pollURL).End()
 	if errs != nil {
-		logrus.Warningf("[CheckIP] testIP = %s, pollURL = %s: Error = %v", testIP, pollURL, errs)
+		//logrus.Warningf("[CheckIP] testIP = %s, pollURL = %s: Error = %v", testIP, pollURL, errs)
 		return false
 	}
 

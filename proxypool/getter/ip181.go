@@ -47,10 +47,10 @@ func IP181() (result []*proxypool.IP) {
 		ip := &proxypool.IP{}
 		ip.Data = results[i].IP + ":" + results[i].Port
 		ip.Type1 = "http"
-		logrus.Info("[IP181] ip.Data: %s,ip.Type: %s", ip.Data, ip.Type1)
+		//logrus.Infof("[IP181] ip.Data: %s,ip.Type: %s", ip.Data, ip.Type1)
 		result = append(result, ip)
 	}
 
-	logrus.Info("IP181 done.")
+	//logrus.Info("IP181 done.")
 	return
 }
