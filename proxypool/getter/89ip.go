@@ -12,7 +12,7 @@ import (
 
 //IP89 get ip from www.89ip.cn
 func IP89() (result []*proxypool.IP) {
-	logrus.Info("89IP] start test")
+	//logrus.Info("[89IP] start test")
 	var ExprIP = regexp.MustCompile(`((25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\:([0-9]+)`)
 	pollURL := "http://www.89ip.cn/tqdl.html?api=1&num=100&port=&address=%E7%BE%8E%E5%9B%BD&isp="
 

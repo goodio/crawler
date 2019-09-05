@@ -38,7 +38,7 @@ func run(ipChan chan<- *proxypool.IP) {
 	funs := []func() []*proxypool.IP{
 		getter.Feiyi,
 		getter.IP66, //need to remove it
-		getter.KDL,
+		//getter.KDL,
 		//getter.GBJ,	//因为网站限制，无法正常下载数据
 		//getter.Xici,
 		//getter.XDL,

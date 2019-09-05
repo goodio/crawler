@@ -27,11 +27,30 @@ func RondomIP() IP {
 	ip := IP{}
 	for _, v := range ips {
 		json.Unmarshal(v, &ip)
-		logrus.Infof("IP: %s, type1: %s, type2: %s, speed: %d", ip.Data, ip.Type1, ip.Type2, ip.Speed)
+		//logrus.Infof("IP: %s, type1: %s, type2: %s, speed: %d", ip.Data, ip.Type1, ip.Type2, ip.Speed)
 		break
 	}
 
 	return ip
+}
+
+func GetIPS() []string {
+
+	data := db.FindAll(BUCKET_NAME)
+
+	ip := IP{}
+
+	ips := make([]string, len(data))
+
+	for _, v := range data {
+		json.Unmarshal(v, &ip)
+
+		ips = append(ips, ip.Type1+"://"+ip.Data)
+
+		//logrus.Error(ip.Type1 + "://" + ip.Data)
+	}
+
+	return ips
 }
 
 func CheckAndSave(ip *IP) {

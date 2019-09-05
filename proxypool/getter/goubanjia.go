@@ -1,7 +1,6 @@
 package getter
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -20,7 +19,7 @@ func GBJ() (result []*proxypool.IP) {
 		logrus.Error(errs)
 		return
 	}
-	fmt.Println(resp.Body)
+	//fmt.Println(resp.Body)
 	if resp.StatusCode != 200 {
 		logrus.Println(resp.StatusCode)
 		logrus.Warn(errs)
