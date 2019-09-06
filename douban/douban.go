@@ -5,10 +5,11 @@ import (
 	"github.com/gocolly/colly/extensions"
 	"github.com/sirupsen/logrus"
 	"math/rand"
-	"net"
-	"net/http"
 	"time"
 )
+
+type Book struct {
+}
 
 func main() {
 
@@ -17,7 +18,7 @@ func main() {
 		colly.AllowedDomains("book.douban.com"),
 	)
 
-	c.WithTransport(&http.Transport{
+	/*c.WithTransport(&http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -28,7 +29,7 @@ func main() {
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-	})
+	})*/
 
 	extensions.RandomUserAgent(c)
 

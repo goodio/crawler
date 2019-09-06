@@ -1,30 +1,30 @@
-package main
+package mobile
 
 import (
 	"bytes"
+	"io/ioutil"
+	"math/rand"
+	"os"
+	"path"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/text/encoding/simplifiedchinese"
-	"io/ioutil"
-	"math/rand"
 	"net"
 	"net/http"
-	"os"
-	"path"
-	"regexp"
-	"time"
-	"strings"
 )
 
-const BOOK_STORE = `E:\data\book`
-//const BOOK_STORE = `./book`
+const BOOK_STORE = `E:\data\books`
 
 func main() {
 
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.bqg5200.com"),
-		//colly.DisallowedURLFilters(regexp.MustCompile(`https:\/\/m.bqg5200.com\/wapbook-753-(\d+)*`)),
+		colly.AllowedDomains("m.bqg5200.com"),
+		colly.DisallowedURLFilters(regexp.MustCompile(`https:\/\/m.bqg5200.com\/wapbook-753-(\d+)*`)),
 		colly.Async(true),
 	)
 
@@ -32,7 +32,7 @@ func main() {
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
-			//KeepAlive: 30 * time.Second,
+			KeepAlive: 30 * time.Second,
 			DualStack: true,
 		}).DialContext,
 		MaxIdleConns:          100,
@@ -43,9 +43,18 @@ func main() {
 
 	extensions.RandomUserAgent(c)
 
-	var reg = regexp.MustCompile(`https:\/\/www.bqg5200.com\/xiaoshuo\/\d+\/\d+\/(\d+).html`)
+	/*rp, err := proxy.RoundRobinProxySwitcher("http://103.108.47.17:30290","http://103.14.235.26:8080","http://103.93.237.74:3128",)
 
-	c.OnHTML("body.clo_bg", func(e *colly.HTMLElement) {
+	if err != nil {
+		logrus.Errorf("设置IP代理失败：%v", err)
+	}
+
+	c.SetProxyFunc(rp)*/
+
+	//var reg = regexp.MustCompile(`\/\w+-\d+-(\d+)`)
+	var reg = regexp.MustCompile(`https:\/\/m.bqg5200.com\/wapbook-\d+-(\d+)*`)
+
+	c.OnHTML("body#nr_body", func(e *colly.HTMLElement) {
 
 		upath := e.Request.URL.String()
 
@@ -53,26 +62,21 @@ func main() {
 
 		h, _ := e.DOM.Html()
 
-		html, _ := DecodeGBK([]byte(h))
+		html, err := DecodeGBK([]byte(h))
 
 		dom := e.DOM.SetHtml(string(html))
 
-		class_name := dom.Find("#header .readNav :nth-child(2)").Text()
+		book_name := dom.Find("h1#_52mb_h1").Text()
 
-		book_name := dom.Find("#header .readNav :nth-child(3)").Text()
+		title := strings.TrimSpace(dom.Find("div#nr_title").Text())
 
-		title := strings.TrimSpace(dom.Find("div.title h1").Text())
-
-		dom.Find("div#content div").Remove()
-		article, _ := dom.Find("div#content").Html()
-		article = strings.Replace(article, "聽", " ", -1)
-		article = strings.Replace(article, "<br/>", "\n", -1)
+		article := strings.Replace(dom.Find("div#nr1").Text(), "聽", " ", -1)
 
 		content := "### " + title + "\n" + article + "\n\n"
 
-		filepath := path.Join(class_name, book_name, fname[1])
+		filepath := path.Join(book_name, fname[1])
 
-		err := write(filepath, content)
+		err = write(filepath, content)
 
 		if err != nil {
 			logrus.Errorf("%v\n", err)
@@ -83,14 +87,13 @@ func main() {
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Request.AbsoluteURL(e.Attr("href"))
 
-		c.Visit(link)
-
-		/*if !strings.HasPrefix(link, `https://m.bqg5200.com/wapbook-753-`) {
+		if !strings.HasPrefix(link, `https://m.bqg5200.com/wapbook-753-`) {
 			c.Visit(link)
-		}*/
+		}
 	})
 
 	c.Limit(&colly.LimitRule{
+		DomainRegexp: `https:\/\/m.bqg5200.com\/wapbook-\d+-(\d+)*`,
 		RandomDelay:  2 * time.Second,
 		Parallelism:  5,
 	})
@@ -100,7 +103,8 @@ func main() {
 		logrus.Infof("Visiting %s", r.URL.String())
 	})
 
-	c.Visit("https://www.bqg5200.com")
+	c.Visit("https://m.bqg5200.com")
+	//c.Visit("https://m.bqg5200.com/wapbook-24282-10406931/")
 
 	c.Wait()
 
