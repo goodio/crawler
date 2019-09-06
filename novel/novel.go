@@ -154,3 +154,4 @@ func init() {
 		ForceColors: true,
 	})
 }
+
