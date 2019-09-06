@@ -83,11 +83,11 @@ func main() {
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Request.AbsoluteURL(e.Attr("href"))
 
-		c.Visit(link)
+		//c.Visit(link)
 
-		/*if !strings.HasPrefix(link, `https://m.bqg5200.com/wapbook-753-`) {
+		if strings.HasPrefix(link, `https://www.bqg5200.com/book`) || strings.HasPrefix(link, `https://www.bqg5200.com/xiaoshuo`) {
 			c.Visit(link)
-		}*/
+		}
 	})
 
 	c.Limit(&colly.LimitRule{
@@ -96,7 +96,7 @@ func main() {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		time.Sleep(getRandomDelay(1000))
+		time.Sleep(getRandomDelay(10000))
 		logrus.Infof("Visiting %s", r.URL.String())
 	})
 
