@@ -7,19 +7,20 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"flag"
 )
+
+var path = flag.String("path", "books", "待处理文件夹")
 
 func main() {
 
-	/*path := `E:\data\go\src\github.com\ghaoo\crawler\novel\book\剑来`
-
-	files, _ := filepath.Glob(path + "\\*")
+	files, _ := filepath.Glob(*path + "\\*")
 	for _, v := range files {
 		fmt.Printf("开始处理文件夹：%s \n", v)
 		merge(v)
-	}*/
+	}
 
-	merge(`E:\data\go\src\github.com\ghaoo\crawler\novel\book\剑来`)
+	//merge(`E:\data\go\src\github.com\ghaoo\crawler\novel\book\剑来`)
 }
 
 func merge(root string) {

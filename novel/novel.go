@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -14,16 +13,33 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"golang.org/x/text/encoding/simplifiedchinese"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"net"
 )
 
-const BOOK_STORE = `./book`
+const BOOK_STORE = `E:\data\books`
 
 func main() {
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("m.bqg5200.com"),
-		//colly.Async(true),
+		colly.DisallowedURLFilters(regexp.MustCompile(`https:\/\/m.bqg5200.com\/wapbook-753-(\d+)*`)),
+		colly.Async(true),
 	)
+
+	c.WithTransport(&http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	})
 
 	extensions.RandomUserAgent(c)
 
@@ -63,7 +79,7 @@ func main() {
 		err = write(filepath, content)
 
 		if err != nil {
-			fmt.Printf("%v\n", err)
+			logrus.Errorf("%v\n", err)
 		}
 
 	})
@@ -71,28 +87,27 @@ func main() {
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Request.AbsoluteURL(e.Attr("href"))
 
-		c.Visit(link)
-
-		/*if reg.MatchString(link) {
+		if !strings.HasPrefix(link, `https://m.bqg5200.com/wapbook-753-`) {
 			c.Visit(link)
-		}*/
+		}
 	})
 
 	c.Limit(&colly.LimitRule{
-		DomainGlob:  "m.bqg5200.com/*",
+		DomainRegexp:  `https:\/\/m.bqg5200.com\/wapbook-\d+-(\d+)*`,
 		RandomDelay: 2 * time.Second,
 		Parallelism: 5,
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		//time.Sleep(getRandomDelay(1000))
-		fmt.Println("Visiting", r.URL.String())
+		time.Sleep(getRandomDelay(1000))
+		logrus.Infof("Visiting %s", r.URL.String())
 	})
 
 	c.Visit("https://m.bqg5200.com")
 	//c.Visit("https://m.bqg5200.com/wapbook-24282-10406931/")
 
 	c.Wait()
+
 }
 
 func write(file, content string) error {
@@ -136,4 +151,10 @@ func DecodeGBK(s []byte) ([]byte, error) {
 	reader := simplifiedchinese.GB18030.NewDecoder().Reader(bytes.NewReader(s))
 
 	return ioutil.ReadAll(reader)
+}
+
+func init() {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors: true,
+	})
 }
