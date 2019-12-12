@@ -21,10 +21,11 @@ import (
 	"io"
 )
 
-var url = `https://www.bqg5200.com/xiaoshuo/23/23730/`
+//var url = `https://www.bqg5200.com/xiaoshuo/23/23730/`
+var url = `https://www.cnoz.org/0_1/`
 
 type Catalog struct {
-	ID          int       // ID
+	ID          string    // ID
 	SubID       string    // SUB ID
 	Name        string    // 名称
 	Author      string    // 作者
@@ -42,22 +43,22 @@ type Chapter struct {
 }
 
 func main() {
-	cat := GetCatalog(url)
+	cat := CNOZ_GetCatalog(url)
 
-	fetchContent(&cat)
+	fetchContent(cat)
 
 	path := cat.Name
 
 	fileMerge(path)
 }
 
-func GetCatalog(url string) Catalog {
-	cl := Catalog{}
+func CNOZ_GetCatalog(url string) *Catalog {
+	cl := &Catalog{}
 
-	logrus.Warn(url)
+	logrus.Info(url)
 
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.bqg5200.com"),
+		colly.AllowedDomains("www.cnoz.org"),
 	)
 
 	c.Limit(&colly.LimitRule{
@@ -78,18 +79,16 @@ func GetCatalog(url string) Catalog {
 
 	extensions.RandomUserAgent(c)
 
-	var reg = regexp.MustCompile(`https:\/\/www.bqg5200.com\/xiaoshuo\/(\d+)\/(\d+)[\/]?$`)
-	var reg2 = regexp.MustCompile(`https:\/\/www.bqg5200.com\/xiaoshuo\/\d+\/\d+\/(\d+).html`)
-	c.OnHTML("div#maininfo", func(e *colly.HTMLElement) {
+	var reg = regexp.MustCompile(`https:\/\/www.cnoz.org\/0_(\d+)[\/]?$`)
+	var reg2 = regexp.MustCompile(`https:\/\/www.cnoz.org\/0_\d+\/(\d+).html`)
+
+	c.OnHTML("div#wrapper", func(e *colly.HTMLElement) {
+
 		url := e.Request.URL.String()
 
 		idr := reg.FindStringSubmatch(url)
 
-		subid := idr[1]
-
-		idstr := idr[2]
-
-		id, _ := strconv.Atoi(idstr)
+		id := idr[1]
 
 		h, _ := e.DOM.Html()
 
@@ -97,52 +96,41 @@ func GetCatalog(url string) Catalog {
 
 		dom := e.DOM.SetHtml(string(html))
 
-		title := dom.Find("div.coverecom div:nth-of-type(2)")
+		title := dom.Find("div#maininfo div#info")
 
 		name := title.Find("h1").Text()
 
-		author := title.Find("span:first-of-type").Text()
+		var cpts = make([]Chapter, 0)
+		dom.Find("div#list dl dd").Each(func(i int, s *goquery.Selection) {
 
-		category := title.Find("span:nth-of-type(2) a").Text()
+			if i >= 9 {
+				cname := s.Find("a").Text()
+				curl, _ := s.Find("a").Attr("href")
+				curl = e.Request.AbsoluteURL(curl)
 
-		last_update := title.Find("span:nth-of-type(3)").Text()
+				if reg2.MatchString(curl) {
+					cid, err := strconv.Atoi(reg2.FindStringSubmatch(curl)[1])
 
-		last_chapter := dom.Find("#readerlist ul li:last-of-type a").Text()
+					if err != nil {
+						cid = 0
+					}
 
-		cpts := []Chapter{}
-		dom.Find("#readerlist ul li").Each(func(i int, s *goquery.Selection) {
+					cpt := Chapter{
+						ID:   cid,
+						Name: cname,
+						Url:  curl,
+					}
 
-			cname := s.Find("a").Text()
-			curl, _ := s.Find("a").Attr("href")
-			curl = e.Request.AbsoluteURL(curl)
-
-			if reg2.MatchString(curl) {
-				cid, err := strconv.Atoi(reg2.FindStringSubmatch(curl)[1])
-
-				if err != nil {
-					cid = 0
+					cpts = append(cpts, cpt)
 				}
-
-				cpt := Chapter{
-					ID:   cid,
-					Name: cname,
-					Url:  curl,
-				}
-
-				cpts = append(cpts, cpt)
 			}
 
 		})
 
 		cl.ID = id
-		cl.SubID = subid
 		cl.Name = name
-		cl.Author = author
 		cl.Url = url
-		cl.Category = category
 		cl.Chapters = cpts
-		cl.LastChapter = last_chapter
-		cl.LastUpdate = last_update
 
 		fname := path.Join(os.Getenv("BOOK_PATH"), name, "data.json")
 
@@ -164,17 +152,7 @@ func GetCatalog(url string) Catalog {
 
 func fetchContent(cl *Catalog) {
 
-	c := colly.NewCollector(
-		colly.AllowedDomains("www.bqg5200.com"),
-		//colly.DisallowedURLFilters(regexp.MustCompile(`https:\/\/m.bqg5200.com\/wapbook-753-(\d+)*`)),
-		colly.Async(true),
-	)
-
-	c.Limit(&colly.LimitRule{
-		DomainRegexp: "www.bqg5200.com/*",
-		Parallelism:  30,
-		RandomDelay:  5 * time.Second,
-	})
+	c := colly.NewCollector()
 
 	c.WithTransport(&http.Transport{
 		DisableKeepAlives: true,
@@ -182,9 +160,9 @@ func fetchContent(cl *Catalog) {
 
 	extensions.RandomUserAgent(c)
 
-	var reg = regexp.MustCompile(`https:\/\/www.bqg5200.com\/xiaoshuo\/\d+\/\d+\/(\d+).html`)
+	var reg = regexp.MustCompile(`https:\/\/www.cnoz.org\/0_\d+\/(\d+).html`)
 
-	c.OnHTML("body.clo_bg", func(e *colly.HTMLElement) {
+	c.OnHTML(".content_read div.box_con", func(e *colly.HTMLElement) {
 
 		upath := e.Request.URL.String()
 
@@ -196,9 +174,7 @@ func fetchContent(cl *Catalog) {
 
 		dom := e.DOM.SetHtml(string(html))
 
-		book_name := dom.Find("#header .readNav :nth-child(3)").Text()
-
-		title := strings.TrimSpace(dom.Find("div.title h1").Text())
+		title := dom.Find(".bookname h1").Text()
 
 		dom.Find("div#content div").Remove()
 		article, _ := dom.Find("div#content").Html()
@@ -207,7 +183,7 @@ func fetchContent(cl *Catalog) {
 
 		content := "### " + title + "\n" + article + "\n\n"
 
-		fpath := filepath.Join(book_name, fname[1]+".rbx")
+		fpath := filepath.Join(cl.Name, fname[1]+".rbx")
 
 		err := tools.FileWrite(fpath, []byte(content))
 
@@ -218,8 +194,8 @@ func fetchContent(cl *Catalog) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		time.Sleep(time.Second)
-		logrus.Debugf("Visiting %s", r.URL.String())
+		//time.Sleep(time.Second)
+		logrus.Infof("访问 %s", r.URL.String())
 	})
 
 	for _, cpt := range cl.Chapters {
@@ -286,6 +262,7 @@ func fileMerge(root string) error {
 }
 
 func init() {
+	logrus.SetLevel(logrus.TraceLevel)
 	logrus.SetFormatter(&logrus.TextFormatter{
 		ForceColors: true,
 	})
