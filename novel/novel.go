@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"sort"
 	"io"
+	"path"
 )
 
 //var url = `https://www.bqg5200.com/xiaoshuo/23/23730/`
@@ -133,7 +134,8 @@ func CNOZ_GetCatalog(url string) *Catalog {
 		cl.Url = url
 		cl.Chapters = cpts
 
-		fname := filepath.Join(os.Getenv("BOOK_PATH"), name, "data.json")
+		fname := path.Join(name, "data.json")
+		fmt.Println(fname)
 
 		data, err := json.Marshal(&cl)
 		if err != nil {
@@ -184,7 +186,7 @@ func fetchContent(cl *Catalog) {
 
 		content := "### " + title + "\n" + article + "\n\n"
 
-		fpath := filepath.Join(cl.Name, fname[1]+".rbx")
+		fpath := path.Join(cl.Name, fname[1]+".rbx")
 
 		err := tools.FileWrite(fpath, []byte(content))
 
@@ -211,7 +213,7 @@ func fetchContent(cl *Catalog) {
 func fileMerge(root string) error {
 	name := filepath.Base(root)
 
-	out_name := filepath.Join(root, name+".txt")
+	out_name := path.Join(root, name+".txt")
 
 	out_file, err := os.OpenFile(out_name, os.O_CREATE|os.O_WRONLY, 0777)
 
@@ -239,7 +241,7 @@ func fileMerge(root string) error {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".rbx") {
 			logrus.Printf("读取文件：%s \n", file.Name())
 
-			fp, err := os.Open(filepath.Join(root, file.Name()))
+			fp, err := os.Open(path.Join(root, file.Name()))
 
 			if err != nil {
 				fmt.Printf("Can not open file %v", err)
