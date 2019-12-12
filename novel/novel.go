@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
-	"path"
 	"regexp"
 	"time"
 	"strings"
@@ -18,6 +17,8 @@ import (
 	"encoding/json"
 	"path/filepath"
 	"bufio"
+	"io/ioutil"
+	"sort"
 	"io"
 )
 
@@ -43,13 +44,13 @@ type Chapter struct {
 }
 
 func main() {
-	cat := CNOZ_GetCatalog(url)
+	/*cat := CNOZ_GetCatalog(url)
 
 	fetchContent(cat)
 
-	path := cat.Name
+	path := cat.Name*/
 
-	fileMerge(path)
+	fileMerge("诡秘之主")
 }
 
 func CNOZ_GetCatalog(url string) *Catalog {
@@ -132,7 +133,7 @@ func CNOZ_GetCatalog(url string) *Catalog {
 		cl.Url = url
 		cl.Chapters = cpts
 
-		fname := path.Join(os.Getenv("BOOK_PATH"), name, "data.json")
+		fname := filepath.Join(os.Getenv("BOOK_PATH"), name, "data.json")
 
 		data, err := json.Marshal(&cl)
 		if err != nil {
@@ -150,7 +151,7 @@ func CNOZ_GetCatalog(url string) *Catalog {
 	return cl
 }
 
-func fetchContent(cl *Catalog) {
+func fetchContent(cl *Catalog, start int) {
 
 	c := colly.NewCollector()
 
@@ -194,7 +195,7 @@ func fetchContent(cl *Catalog) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		//time.Sleep(time.Second)
+		time.Sleep(time.Second)
 		logrus.Infof("访问 %s", r.URL.String())
 	})
 
@@ -222,10 +223,53 @@ func fileMerge(root string) error {
 
 	bWriter.Write([]byte("## " + name + "\n\n\n"))
 
-	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	files, _ := ioutil.ReadDir(root)
+
+	sort.SliceStable(files, func(i, j int) bool {
+		name1 := strings.TrimSuffix(files[i].Name(), ".rbx")
+		name2 := strings.TrimSuffix(files[j].Name(), ".rbx")
+
+		f1, _ := strconv.Atoi(name1)
+		f2, _ := strconv.Atoi(name2)
+
+		return  f1 < f2
+	})
+
+	for _, file := range files{
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".rbx") {
+			logrus.Printf("读取文件：%s \n", file.Name())
+
+			fp, err := os.Open(filepath.Join(root, file.Name()))
+
+			if err != nil {
+				fmt.Printf("Can not open file %v", err)
+				return err
+			}
+
+			defer fp.Close()
+
+			bReader := bufio.NewReader(fp)
+
+			for {
+
+				buffer := make([]byte, 1024)
+				readCount, err := bReader.Read(buffer)
+				if err == io.EOF {
+					break
+				} else {
+					bWriter.Write(buffer[:readCount])
+				}
+
+			}
+
+			bWriter.Write([]byte("\n"))
+		}
+	}
+
+	/*filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 
 		if !info.IsDir() && strings.HasSuffix(path, ".rbx") {
-			//logrus.Printf("读取文件：%s \n", info.Name())
+			logrus.Printf("读取文件：%s \n", info.Name())
 
 			fp, err := os.Open(path)
 
@@ -250,11 +294,11 @@ func fileMerge(root string) error {
 
 			}
 
-			bWriter.Write([]byte("\n\n"))
+			bWriter.Write([]byte("\n"))
 		}
 
 		return err
-	})
+	})*/
 
 	bWriter.Flush()
 
