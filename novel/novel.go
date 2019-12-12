@@ -44,13 +44,13 @@ type Chapter struct {
 }
 
 func main() {
-	/*cat := CNOZ_GetCatalog(url)
+	cat := CNOZ_GetCatalog(url)
 
 	fetchContent(cat)
 
-	path := cat.Name*/
+	path := cat.Name
 
-	fileMerge("诡秘之主")
+	fileMerge(path)
 }
 
 func CNOZ_GetCatalog(url string) *Catalog {
@@ -151,7 +151,7 @@ func CNOZ_GetCatalog(url string) *Catalog {
 	return cl
 }
 
-func fetchContent(cl *Catalog, start int) {
+func fetchContent(cl *Catalog) {
 
 	c := colly.NewCollector()
 
